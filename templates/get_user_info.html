@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <form action="/get_user_info" method="post">
+    <div>
+      <label for="devcode">Dev Code:</label>
+      <input type="text" id="devcode" name="devcode" required>
+    </div>
+    <div>
+      <label for="token">Token:</label>
+      <input type="text" id="token" name="token" required>
+    </div>
+    <div>
+      <label for="distinct_id">Distinct ID:</label>
+      <input type="text" id="distinct_id" name="distinct_id" required>
+    </div>
+    <button type="submit">提交个人数据</button>
+  </form>
+
+  <script>
+    const alertMessage = "{{ alert | safe }}";
+    if (alertMessage) {
+        alert(alertMessage);
+    }
+  </script>
+{% endblock %}
