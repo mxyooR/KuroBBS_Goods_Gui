@@ -12,6 +12,7 @@ import os
 import global_vars
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+import webbrowser
 
 tasks = {}
 executor = ThreadPoolExecutor(max_workers=1)
@@ -295,4 +296,6 @@ if __name__ == '__main__':
     except Exception as e:
         log_message(f"读取配置文件失败:{e}")
         global_vars.CorrectProfile= False
-    app.run(debug=True)
+    webbrowser.open('http://127.0.0.1:5001')
+    app.run(debug=True,port=5001)
+    

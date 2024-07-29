@@ -28,7 +28,7 @@
 
 ### 普通用户
 
-- ~~ 直接在 release 页面下载最新版本即可~~ (还没写)。
+- ~~直接在 release 页面下载最新版本即可~~ (还没写)。
 
 ### 开发者
 
@@ -42,44 +42,33 @@
 1. 克隆本仓库：
 
     ```bash
-    git clone https://github.com/mxyooR/Mys_Goods_Gui
+    git clone https://github.com/mxyooR/KuroBBS_Goods_Gui
     cd Mys_Goods_Gui
     ```
 
 2. 安装 Python 依赖：
 
     ```bash
-    cd flask_app
+
     pip install -r requirements.txt
     ```
 
-3. 安装 Electron 依赖：
-
-    ```bash
-    cd ..
-    npm install
-    ```
 
 #### 运行应用
 
 1. 启动 Flask 后端：
 
     ```bash
-    cd flask_app
+
     python app.py
     ```
-    若无需 Electron，可直接在浏览器打开 `127.0.0.1:5000`
+    在浏览器打开 `127.0.0.1:5001`
 
-2. 启动 Electron 前端：
 
-    ```bash
-    cd ..
-    npm start
-    ```
 
 ## 参考项目
 
-本项目参考~~ ctrl+c~~ 了以下开源项目(反正差不多)：
+本项目参考~~CTRL+C~~了以下开源项目(反正差不多)：
 
 - [Mys_Goods_Gui](https://github.com/mxyooR/Mys_Goods_Gui)
 
