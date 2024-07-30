@@ -21,7 +21,7 @@
 
 ### 开发文档
 [GoodsDetails](/docs/GoodsDetails.md)
-[Exchange] (/docs/Exchange.md)
+[Exchange](/docs/Exchange.md)
 
 
 
