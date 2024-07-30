@@ -33,7 +33,7 @@ def set_globalvars(data):
     global_vars.distinct_id = data["distinct_id"]
     global_vars.headers = {
     "devcode": global_vars.devcode,
-    "ip": "127.0.0.1",
+    "ip": tools.get_ip_address(),
     "source": "android",
     "version": "2.2.2",
     "versioncode": "2220",
@@ -139,6 +139,7 @@ def create_task():
     if request.method == 'GET':
         # 检查是否已登录
         if not global_vars.CorrectProfile:
+            log_message(global_vars.CorrectProfile)
             return redirect(url_for('get_user_info', alert="请先填写个人信息"))
         # 获取地址
         addresses= details.get_address_by_accesstoken(global_vars.access_token)
@@ -151,7 +152,7 @@ def create_task():
             log_message(f"Error decoding JSON from {goodslist_path}: {e}")
             goods_list = []
 
-        #addresses.append({'id': '', 'addr_ext': '空地址，兑换游戏内商品选这个'})
+        addresses.append({'id': "", 'uid': "", 'name': '', 'tel': '', 'province': '', 'city': '', 'district': '', 'fullAddress': '', 'isDefault': False, 'createTime': '', 'updateTime': '', 'area': None, 'areaCode': None, 'postCode': None})
 
         # 设置默认时间
         default_time = goods_list[0]['saleTime'] if goods_list else ''
@@ -292,7 +293,7 @@ if __name__ == '__main__':
         with open(config_path, "r") as f:
             data = json.load(f)
             set_globalvars(data)
-            CorrectProfile= True
+            global_vars.CorrectProfile= True
     except Exception as e:
         log_message(f"读取配置文件失败:{e}")
         global_vars.CorrectProfile= False

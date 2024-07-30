@@ -2,6 +2,8 @@ import json
 import os
 import global_vars
 from datetime import datetime
+import socket
+
 
 # 获取当前文件的绝对路径
 base_dir = os.path.abspath(os.path.dirname(__file__))
@@ -22,7 +24,17 @@ def convert_timestamp_to_string(timestamp_ms:int):
     return formatted_date
 
 
-
+def get_ip_address():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # 连接到一个公共的服务器，这里使用 Google 的 DNS 服务器
+        s.connect(('8.8.8.8', 80))
+        ip_address = s.getsockname()[0]
+    except socket.error:
+        ip_address = '127.0.0.1'
+    finally:
+        s.close()
+    return ip_address
 
 
 def add_to_wishlist(commodityCode, saleTime, commodityName, gameId):
