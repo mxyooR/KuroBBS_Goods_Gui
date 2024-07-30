@@ -8,6 +8,7 @@ config.json
 tasklist.json
 log.log
 code.png
+*.har
 
 
 # IDE和编辑器相关文件
@@ -20,6 +21,7 @@ code.png
 build/
 dist/
 out/
+research/
 
 # 依赖库
 node_modules/

@@ -152,7 +152,7 @@ def create_task():
             log_message(f"Error decoding JSON from {goodslist_path}: {e}")
             goods_list = []
 
-        addresses.append({'id': "", 'uid': "", 'name': '', 'tel': '', 'province': '', 'city': '', 'district': '', 'fullAddress': '', 'isDefault': False, 'createTime': '', 'updateTime': '', 'area': None, 'areaCode': None, 'postCode': None})
+        #addresses.append({'id': "", 'uid': "", 'name': '', 'tel': '', 'province': '', 'city': '', 'district': '', 'fullAddress': '', 'isDefault': False, 'createTime': '', 'updateTime': '', 'area': None, 'areaCode': None, 'postCode': None})
 
         # 设置默认时间
         default_time = goods_list[0]['saleTime'] if goods_list else ''

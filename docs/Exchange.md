@@ -51,7 +51,8 @@
 | -------------- | ------ |------------------------- |
 | commodityCode  | string |商品代码                  |
 | commodityNum   | number |商品数量                  |
-| geeTestData    | string |极验测试数据              |
+|roleId           |number|兑换虚拟物品时填写，游戏内角色id
+| geeTestData    | string |极验测试数据(如果兑换虚拟物品无需输入)              |
 | province       | string |省份                      |
 | city           | string |城市                      |
 | area           | string |区域                      |
@@ -75,13 +76,24 @@
 
 ### 响应示例
 
-失败响应示例(暂时没有成功的,库洛币不够)：
+失败响应示例：
 
 ```json
 {
     "code": 101,
     "msg": "商品不在销售状态，无法购买",
     "success": false
+}
+```
+成功响应示例：
+```json
+{
+  "code": 200,
+  "data": {
+    "orderCode": "11111111111111"
+  },
+  "msg": "请求成功",
+  "success": true
 }
 ```
 
@@ -114,6 +126,4 @@ graph TD
     M --> N[结束]
 ```
 注意，由于不知道验证码机制，目前方案是一个payload然后异步并发`count`次数
-
-
 
