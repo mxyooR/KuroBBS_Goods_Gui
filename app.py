@@ -170,7 +170,7 @@ def add_to_tasklist():
     commodityCode = str(request.json.get('commodityCode'))
     #address返回的是字符串，需要转换成字典
     address_str = request.json.get('address')
-    address_str = address_str.replace("True", "true").replace("None", "null").replace("'", '"')
+    address_str = address_str.replace("True", "true").replace("None", "null").replace("False", "false").replace("'", '"')
     address = json.loads(address_str)
 
     time = request.json.get('task_time')
@@ -214,15 +214,6 @@ async def start_task():
 
     return render_template('start_task.html', tasks=tasks, current_time=await exchange.get_ntp_time(),task_running=global_vars.task_running)
 
-@app.route('/get_current_time')
-async def get_current_time():
-    ntp_time = await exchange.get_ntp_time()
-    if ntp_time is not None:
-        formatted_time = ntp_time.strftime('%Y-%m-%d %H:%M:%S')
-    else:
-        formatted_time = "Error fetching NTP time"
-    
-    return jsonify(current_time=formatted_time)
 
 @app.route('/get_task_status', methods=['GET'])
 def get_task_status():
