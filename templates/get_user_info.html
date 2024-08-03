@@ -1,6 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+  <h2>获取个人信息</h2>
+  <p>请填写以下信息以获取个人信息：</p>
+  <p>Dev Code、Token、Distinct ID</p>
+  <p>以上信息可以抓包获取或参考<a href="https://github.com/mxyooR/Kuro-autosignin">Kuro-autosignin</a>项目获取</p>
+
+
+
+
+
   <form action="/get_user_info" method="post">
     <div>
       <label for="devcode">Dev Code:</label>
