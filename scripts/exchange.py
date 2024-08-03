@@ -25,6 +25,7 @@ async def orderbeforeCreate(headers):
     async with httpx.AsyncClient() as client:
         try:
             res = await client.post(url, headers=headers)
+            #print(res.text)
             return None
         except Exception as e:
             log_message(f"发起order前置步骤失败:{e}")
@@ -58,7 +59,7 @@ async def exchange_goods(payload, headers):
 
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.post(url, data=json.dumps(payload), headers=headers)
+            response = await client.post(url, data=payload, headers=headers)
             task_messages.append(response.text)
             log_message(response.text)
         except httpx.HTTPStatusError as e:
@@ -73,6 +74,8 @@ async def exchange_goods(payload, headers):
 async def schedule_task(task,count):
         payload = task["payload"]
         headers = task["headers"]
+        #print(payload)
+        #print(headers)
         target_time = datetime.fromisoformat(task["time"])
         tasks = [exchange_goods(payload, headers) for _ in range(count)]
         log_message(f"任务已添加到任务清单中, 将在 {target_time} 执行,{tasks}")
