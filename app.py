@@ -6,23 +6,21 @@
 
 import json
 from flask import Flask, render_template, request, redirect, url_for, jsonify,send_file
-from scripts import details, tools,exchange
+from scripts import details, tools
+from scripts.exchange import ExchangeTask
 from scripts.log import log_message,setup_logger
 import os
 import global_vars
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import webbrowser
+from global_vars import base_dir,goodslist_path,config_path,tasklistpath
 
 tasks = {}
-executor = ThreadPoolExecutor(max_workers=1)
+executor = ThreadPoolExecutor(max_workers=10)
 app = Flask(__name__)
+task_instances = {}# 存储正在运行的任务对象的字典
 
-base_dir = os.path.abspath(os.path.dirname(__file__))
-parent_dir = os.path.dirname(base_dir)
-goodslist_path = os.path.join(base_dir, 'goodslist.json')
-config_path = os.path.join(base_dir, 'config.json')
-tasklistpath = os.path.join(base_dir, 'tasklist.json')
 
 
 
@@ -212,61 +210,94 @@ async def start_task():
         log_message(f"Error loading tasklist.json: {e}")
         return redirect(url_for('create_task', alert="请先创建任务清单"))
 
-    return render_template('start_task.html', tasks=tasks, current_time=await exchange.get_ntp_time(),task_running=global_vars.task_running)
+    return render_template('start_task.html', tasks=tasks, task_running=any(instance.task_running for instance in task_instances.values()))
 
 
+# 获取任务状态
 @app.route('/get_task_status', methods=['GET'])
 def get_task_status():
-    return jsonify(task_running=global_vars.task_running)
+    for task_instance in task_instances.values():
+        if task_instance.task_running:
+            return jsonify(task_running=True)
+    return jsonify(task_running=False)
 
 
+# 获取正在运行的任务
+@app.route('/get_running_tasks', methods=['GET'])
+def get_running_tasks():
+    running_tasks = list(task_instances.keys())
+    log_message(f"正在运行的任务: {running_tasks}")
+    return jsonify(running_tasks=running_tasks)
 
-def run_asyncio_task(task_name,count):
+# 异步运行任务
+def run_asyncio_task(task_name, task_dict):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(exchange.schedule_task(task_name,count))
+    task_instance = ExchangeTask(task_dict)  # 实例化 ExchangeTask 对象
+    task_instances[task_name] = task_instance  # 将对象存储在字典中
+    loop.run_until_complete(task_instance.schedule_task())  # 调用类的方法
     loop.close()
 
+# 运行任务
 @app.route('/run_task', methods=['POST'])
 def run_task():
     with open(tasklistpath, 'r', encoding="utf-8") as f:
         tasks = json.load(f)
-    selected_task_time = request.form.get('task')
-    selected_task = next((task for task in tasks if task['time'] == selected_task_time), None)
-    
+    selected_task_name = request.form.get('task')
+    selected_task = next((task for task in tasks if task['name'] == selected_task_name), None)
+    #print(selected_task)
+    #print(selected_task_name)
     if selected_task:
-        count = selected_task.get('count', 5)  # 默认值为1，如果count不存在
+        task_name = selected_task.get('name')
+        if not task_name:
+            return jsonify({"error": "Task name is missing"}), 400
+
+        # 检查任务是否已经在运行
+        if task_name in task_instances:
+            return jsonify({"error": f"Task '{task_name}' is already running"}), 409
+
+        count = selected_task.get('count', 5)  # 默认值为5，如果count不存在
         try:
             count = int(count)
         except Exception as e:
             log_message(f"Error converting count to integer: {e}")
             log_message(f"自动改成默认值count: {count}")
             count = 5
-        log_message(f"任务已经开始: {selected_task.get('name')}")
-        global_vars.task_running = True
-        executor.submit(run_asyncio_task, selected_task, count)
-        return "Task is running"
+        
+        selected_task['count'] = count  # 确保count是整数
+
+        log_message(f"任务已经开始: {task_name}")
+        executor.submit(run_asyncio_task, task_name, selected_task)
+        return jsonify({"message": "Task is running", "task_name": task_name})
     else:
-        return "Task not found", 404
+        return jsonify({"error": "Task not found"}), 404
 
-
-
+# 获取任务消息
 @app.route('/get_task_messages', methods=['GET'])
 def get_task_messages():
-    # 获取并清理任务消息
-    messages = exchange.task_messages.copy()
-    exchange.task_messages.clear()
+    task_name = request.args.get('task_name')
+    messages = {}
+    if task_name:
+        task_instance = task_instances.get(task_name)
+        if task_instance and task_instance.task_messages:
+            messages[task_name] = task_instance.task_messages.copy()
+            task_instance.task_messages.clear()
+
     return jsonify(messages=messages)
 
 # 停止任务
 @app.route('/stop_task', methods=['POST'])
 def stop_task():
-    global_vars.task_running = False
-    messages = "任务已经停止"
-    log_message(messages)
-    return jsonify(messages=messages)
-
-
+    task_name = request.form.get('task_name')
+    task_instance = task_instances.get(task_name)
+    if task_instance:
+        task_instance.task_running = False
+        del task_instances[task_name]
+        message = f"任务 {task_name} 已经停止"
+        log_message(message)
+        return jsonify(messages=message)
+    else:
+        return jsonify(messages="Task not found"), 404
 
 
 
